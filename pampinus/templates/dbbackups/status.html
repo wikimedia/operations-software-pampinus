@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+{% load time %}
+{% load size %}
+{% load humanize %}
+
+  <div class="toggle">
+  <strong>Current status</strong> | <a href="/dbbackups/jobs">Jobs</a>
+  </div>
+
+  <h2>Backup status</h2>
+
+  <table>
+    <thead>
+    <tr>
+        <th title="section, shard or identifier of the dataset backed up" class="section">name</th>
+        <th title="Datacenter where the copy is geographically located" class="dc">dc</th>
+        <th title="Type of backup produced" class="type">type</th>
+        <th title="Is the backup in good condition?" class="type">state</th>
+        <th title="When did the backup finish?" class="backup-time">finished</th>
+        <th title="Size in bytes of the backup, untarred" class="size">size</th>
+        <th title="Percentage of change using as a base the latest backup of the same data, type and datacenter" class="change">size change</th>
+        <th title="Relevant information about the backup status, if any" class="msg">message</th>
+    </tr></thead>
+    <tbody>
+    {% for section_status in status %}
+    <tr>
+      <td title="{{section_status.name}}" style="max-width: 4em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        {% ifchanged section_status.name %}
+        {{section_status.name}}
+        {% endifchanged %}
+      </td>
+      {% if section_status.dc == "eqiad" %}
+      <td title="Datacenter located at Equinix in Ashburn, Virginia">
+      {% elif section_status.dc == "codfw" %}
+      <td title="Datacenter located at CyrusOne in Carrollton, Texas">
+      {% else %}
+      <td>
+      {% endif %}
+        {% ifchanged section_status.dc %}
+        {{section_status.dc}}
+        {% endifchanged %}
+      </td>
+      {% if section_status.backup_type == "snapshot" %}
+      <td title="Backup generated from the consistent raw contents of the data dir">
+      {% elif section_status.backup_type == "dump" %}
+      <td title="Backup generated from the consistent logical export of the data contents">
+      {% else %}
+      <td>
+      {% endif %}
+      <a href="/dbbackups/status/{{section_status.dc}}/{{section_status.name}}/{{section_status.backup_type}}">{{ section_status.backup_type }}</a>
+      </td>
+      <td title="{{ section_status.state_description }}"><span class="label label-{{section_status.state}}">{{section_status.state}}</span></td>
+      {% if section_status.state == 'stale' %}
+      <td class="text-stale" style="min-width:12em">
+      {% else %}
+      <td style="min-width:12em">
+      {% endif %}
+      <a title="{{section_status.end_date | date:'c' | default:''}}" href="/dbbackups/jobs/{{section_status.job}}">
+      {{section_status.end_date | naturaltime | default:""}}
+      </a></td>
+      <td title="{{ section_status.size }} bytes">
+      {% if section_status.size %}
+      {{ section_status.size | filesizeformat }}
+      {% endif %}</td>
+      <td title="{{ section_status.size_change_percentage }} %" style="text-align: right;">
+      {{ section_status.size_change_percentage | percentage_change | default:"" }}
+      </td>
+      <td>
+      {{ section_status.msg | default:"" }}
+      {% if section_status.last_job %}
+        {% if section_status.last_job.status == 'ongoing' %}
+          Newer job <img src="/static/loading.gif" style="width: 24px; height: 24px; vertical-align:middle"><a href="/dbbackups/jobs/{{ section_status.last_job.id }}">{{ section_status.last_job.name }}</a> is currently running.
+        {% elif section_status.last_job.status == 'failed' %}
+          Last job for this section: <a href="/dbbackups/jobs/{{ section_status.last_job.id }}">{{ section_status.last_job.name }}</a> failed!
+        {% endif %}
+      {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock %}

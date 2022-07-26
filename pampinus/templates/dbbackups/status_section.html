@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+{% load time %}
+{% load size %}
+
+  <div class="toggle">
+  <a href="/dbbackups">Current status</a> | <a href="/dbbackups/jobs">Jobs</a>
+  </div>
+
+  <h2>{{status_section.backup_type}} status of {{status_section.name}} in {{status_section.dc}}</h2>
+
+    <table>
+    <tbody>
+    <tr>
+        <td title="section, shard or identifier of the dataset backed up">Section</td>
+        <td>{{status_section.name}}</td>
+    </tr>
+    <tr>
+        <td title="Datacenter where the copy is geographically located">Datacenter</td>
+        {% if status_section.dc == "eqiad" %}
+        <td title="Datacenter located at Equinix in Ashburn, Virginia">
+        {% elif status_section.dc == "codfw" %}
+        <td title="Datacenter located at CyrusOne in Carrollton, Texas">
+        {% else %}
+        <td>
+        {% endif %}
+        {{status_section.dc}}</td>
+    </tr>
+    <tr>
+        <td title="Type of backup produced">Backup type</td>
+        {% if status_section.backup_type == "snapshot" %}
+          <td title="Backup generated from the consistent raw contents of the data dir">
+        {% elif status_section.backup_type == "dump" %}
+          <td title="Backup generated from the consistent logical export of the data contents">
+        {% endif %}
+        <a href="/dbbackups/status/{{status_section.dc}}/{{status_section.name}}/{{status_section.backup_type}}">{{ status_section.backup_type }}</a></td>
+    </tr>
+    <tr>
+        <td title="Is the backup in good condition?">Backup status</td>
+        <td title="{{ status_section.state_description }}"><span class="label label-{{status_section.state}}">{{status_section.state}}</span></td>
+    </tr>
+    <tr>
+        <td title="When did the backup start?">Start time</td>
+        <td title="{{status_section.start_date | default:''}}">{{status_section.start_date | date:'c' | default:''}}</td>
+    </tr>
+    <tr>
+        <td title="When did the backup finish?">Finish time</td>
+        <td title="{{status_section.start_date | default:''}}">{{status_section.end_date | date:'c' | default:''}}</td>
+    </tr>
+    <tr>
+        <td title="How much time took the backup to complete">Backup duration</td>
+        <td title="{{ status_section.duration | seconds }} seconds">
+        {% if status_section.duration %}
+        {{ status_section.duration | timespan }}
+        {% endif %}</td>
+    </tr>
+    <tr>
+        <td title="Job id and link where to get more backup job information">Job details (latest complete)</td>
+        <td><a href="/dbbackups/jobs/{{status_section.job}}">
+        Job #{{status_section.job | default:""}}
+        </a></td>
+    </tr>
+    <tr>
+        <td title="Size in bytes of the backup, untarred" class="size">Backup size</td>
+        <td title="{{ status_section.size }} bytes">
+        {% if status_section.size %}
+        {{ status_section.size | filesizeformat }}
+        {% endif %}</td>
+    </tr>
+    <tr>
+        <td title="Percentage of change using as a base the latest backup of the same data, type and datacenter">Size change (percentage)</td>
+        <td title="{{ status_section.size_change_percentage }} %">
+        {{ status_section.size_change_percentage | percentage_change | default:"" }}
+        </td>
+    </tr>
+    <tr>
+        <td title="Relevant information about the backup status, if any">Message</td>
+        <td>
+        {{ status_section.msg | default:"" }}
+        {% if status_section.last_job %}
+          {% if status_section.last_job.status == 'ongoing' %}
+            Newer job <img src="/static/loading.gif" style="width: 24px; height: 24px; vertical-align:middle"><a href="/dbbackups/jobs/{{ status_section.last_job.id }}">{{ status_section.last_job.name }}</a> is currently running.
+          {% elif status_section.last_job.status == 'failed' %}
+            Last job for this section: <a href="/dbbackups/jobs/{{ status_section.last_job.id }}">{{ status_section.last_job.name }}</a> failed!
+          {% endif %}
+        {% endif %}
+        </td>
+    </tr>
+  </tbody>
+  </table>
+
+<h3>Recent backup jobs of the same section, type and datacenter:</h3>
+
+  <table id="backup-list">
+  <thead>
+  <tr>
+    <th class="name">name</th>
+    <th class="status">status</th>
+    <th class="start_date">start date</th>
+    <th class="end_date">end date</th>
+    <th class="duration">duration</th>
+    <th class="total_size">total size</th>
+  </tr></thead>
+  <tbody>
+  </tr>
+    {% for backup in backups %}
+    <tr>
+      <td><a href="/dbbackups/jobs/{{ backup.pk }}/">{{ backup.name }}</a></td>
+      <td><span class="label label-{{ backup.status }}">{{ backup.status }}</span></td>
+      <td data-sort="{{ backup.start_date | date:'c' }}" title="{{backup.start_date | date:'c' }}">{{ backup.start_date }}</td>
+      <td data-sort="{{ backup.end_date | date:'c' }}" title="{{ backup.end_date | date:'c' }}">{{ backup.end_date | default:"" }}</td>
+      <td data-sort="{{ backup.duration | seconds }}" title="{{ backup.duration | seconds }} seconds">{{ backup.duration | timespan | default:"" }}</td>
+      {% if backup.total_size is None %}
+      <td data-sort="0"></td>
+      {% else %}
+      <td data-sort="{{ backup.total_size }}" title="{{ backup.total_size }} bytes">{{ backup.total_size | filesizeformat }}</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+
+<a href="/dbbackups/jobs/?search={{status_section.backup_type}}+{{status_section.name}}+{{status_section.dc}}">Search more jobs like these</a>
+
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load os_version %}
+
+{% block content %}
+<h2>Server {{ server.fqdn }}</h2>
+  <table>
+    <tr>
+      <td>Fully qualified domain name</td>
+      <td>{{ server.fqdn }}</td>
+    </tr>
+    <tr>
+      <td>Hostname</td>
+      <td>{{ server.hostname }}</td>
+    </tr>
+    <tr>
+      <td>Datacenter</td>
+      <td><a href="https://netbox.wikimedia.org/dcim/sites/{{ server.rack.dc }}"><span class="label label-{{ server.rack.dc }}">{{ server.rack.dc }}</span></a></td>
+    </tr>
+    <tr>
+      <td>Rack</td>
+      <td><a href="https://netbox.wikimedia.org/dcim/racks/{{ server.rack.identifier }}/">{{ server.rack.name }}</a></td>
+    </tr>
+    <tr>
+      <td>IP Address</td>
+      <td><a href="https://netbox.wikimedia.org/ipam/ip-addresses/?q={{ server.ip }}">{{ server.ip | default_if_none:"" }} <img src="{% static 'netbox.png' %}" alt="netbox icon" style="vertical-align:middle;"></a></td>
+    </tr>
+    <tr>
+      <td>OS version</td>
+      <td><span class="label label-{{ server.os_version | os_alias | default_if_none:'' }}">{{ server.os_version | os_alias | default_if_none:"" }}</span> {{ server.os_version | default_if_none:"" }}</td>
+    </tr>
+    <tr>
+      <td>Server Uptime</td>
+      <td>{{ server.last_boot | timesince }} (Last boot: {{server.last_boot}})</td>
+    </tr>
+    <tr>
+      <td>Monitoring</td>
+      <td>
+      <a href="https://grafana.wikimedia.org/d/000000377/host-overview?var-server={{ server.hostname }}&amp;var-datasource=thanos"><img src="{% static 'grafana.png' %}" alt="grafana graph link"></a>
+      <a href="https://icinga.wikimedia.org/cgi-bin/icinga/status.cgi?host={{ server.hostname }}"><img src="{% static 'icinga.png' %}" alt="icinga alerting link"></a>
+      </td>
+    </tr>
+  </table>
+
+  <h3>Instances in {{ server.fqdn }}</h3>
+  <table id="instance-list">
+    <thead>
+      <tr>
+      <th class="name">instance</th>
+      <th class="port">port</th>
+      <th class="instance_group">group</th>
+      <th class="master">primary</th>
+      <th class="sections">sections</th>
+      <th class="version">version</th>
+      <th class="uptime">uptime</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for instance in instances %}
+        <tr>
+        <td><a href="/instances/{{ instance.name }}/">{{ instance.name }}</a></td>
+        <td>{{ instance.port }}</td>
+        <td><span class="label label-{{ instance.instance_group }}">{{ instance.instance_group }}</span></td>
+        <td>{{ instance.master_set.all | join:", " | default:"replica" }}</td>
+        <td>{{ instance.section_set.all | join:", " }}
+        <td>{{ instance.version | default_if_none:""}}</td>
+        <td>{{ instance.last_start| timesince | default_if_none:"" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+  <p>{{ instances.count }} instances shown.</p>
+  <script>
+  new Tablesort(document.getElementById('instance-list'));
+  </script>
+
+{% endblock %}

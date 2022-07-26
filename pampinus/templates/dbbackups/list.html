@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load fqdn %}
+{% load time %}
+  <div class="toggle">
+  <a href="/dbbackups/">Current status</a> | <strong>Jobs</strong>
+  </div>
+  <table id="backup-list">
+  <thead>
+  <tr>
+    <th class="name">name</th>
+    <th class="status">status</th>
+    <th class="type">type</th>
+    <th class="dc">dc</th>
+    <th class="section">section</th>
+    <th class="start_date">start date</th>
+    <th class="end_date">end date</th>
+    <th class="duration">duration</th>
+    <th class="total_size">total size</th>
+  </tr></thead>
+  <tbody>
+  </tr>
+    {% for backup in backups %}
+    <tr>
+      <td><a href="/dbbackups/jobs/{{ backup.pk }}/">{{ backup.name }}</a></td>
+      <td><span class="label label-{{ backup.status }}">{{ backup.status }}</span></td>
+      <td>{{ backup.type }}</td>
+      <td>{{ backup.host | datacenter }}</td>
+      <td><a href="/instances/?search={{ backup.section }}">{{ backup.section }}</a></td>
+      <td data-sort="{{ backup.start_date | date:'c' }}" title="{{backup.start_date | date:'c' }}">{{ backup.start_date }}</td>
+      <td data-sort="{{ backup.end_date | date:'c' }}" title="{{ backup.end_date | date:'c' }}">{{ backup.end_date | default:"" }}</td>
+      <td data-sort="{{ backup.duration | seconds }}" title="{{ backup.duration | seconds }} seconds">{{ backup.duration | timespan | default:"" }}</td>
+      {% if backup.total_size is None %}
+      <td data-sort="0"></td>
+      {% else %}
+      <td data-sort="{{ backup.total_size }}" title="{{ backup.total_size }} bytes">{{ backup.total_size | filesizeformat }}</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+  <p>{{ num_backups_showed }} jobs shown out of {{ backups.paginator.count }}.</p>
+  <script>
+  new Tablesort(document.getElementById('backup-list'));
+  </script>
+
+  <div class="pagination">
+    <span class="step-links">
+      {% if backups.has_previous %}
+        <a href="?page=1&amp;search={{ search }}">&laquo; first</a>
+        <a href="?page={{ backups.previous_page_number }}&amp;search={{ search }}">previous</a>
+      {% endif %}
+
+      <span class="current">
+        Page {{ backups.number }} of {{ backups.paginator.num_pages }}.
+      </span>
+
+      {% if backups.has_next %}
+        <a href="?page={{ backups.next_page_number }}&amp;search={{ search }}">next</a>
+        <a href="?page={{ backups.paginator.num_pages }}&amp;search={{ search }}">last &raquo;</a>
+      {% endif %}
+    </span>
+</div>
+{% endblock %}

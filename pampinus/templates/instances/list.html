@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load prometheus_port %}
+{% block content %}
+  <div class="toggle">
+  <strong>By instance</strong> | <a href="/servers">by server</a>
+  </div>
+  <table id="instance-list">
+  <thead>
+  <tr>
+    <th class="name">instance</th>
+    <th class="server">server</th>
+    <th class="port">port</th>
+    <th class="instance_group">group</th>
+    <th class="master">primary?</th>
+    <th class="sections">sections</th>
+    <th class="version">version</th>
+    <th class="uptime">uptime</th>
+    <th class="external-links">external links</th>
+  </tr></thead>
+  <tbody>
+  </tr>
+    {% for instance in instances %}
+    <tr>
+      <td><a href="/instances/{{ instance.name }}/">{{ instance.name }}</a></td>
+      <td><a href="/servers/{{ instance.server.hostname}}/">{{ instance.server.hostname }}</td>
+      <td>{{ instance.port }}</td>
+      <td><span class="label label-{{ instance.instance_group }}">{{ instance.instance_group }}</span></td>
+      <td>{{ instance.master_set.all | join:", " | default:"replica" }}</td>
+      <td title="{{ instance.section_set.all | join:", " }}" style="max-width: 3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      {{ instance.section_set.all | join:", " }}</td>
+      <td>{{ instance.version | default_if_none:"" }}</td>
+      <td data-sort="{{ instance.last_start | date:'c' }}">{{ instance.last_start | timesince | default_if_none:""}}</td>
+      <td>
+      <a href="https://orchestrator.wikimedia.org/web/cluster/alias/{{ instance.section_set.all | first }}"><img src="{% static 'orchestrator.png' %}" alt="orchestrator section link" style="width:24px; height: 24px; vertical-align: middle"></a>&nbsp;
+      <a href="https://grafana.wikimedia.org/d/000000273/mysql?var-job=All&amp;var-server={{ instance.server.hostname }}&amp;var-port={{ instance.port | prometheus_port }}"><img src="{% static 'grafana.png' %}" alt="grafana graph link" style="width:24px; height: 24px; vertical-align: middle"></a>&nbsp;
+      <a href="https://icinga.wikimedia.org/cgi-bin/icinga/status.cgi?search_string={{ instance.server.hostname }}"><img src="{% static 'icinga.png' %}" alt="icinga status link" style="width:24px; height: 24px; vertical-align: middle"></a>&nbsp;
+      {% for s in instance.section_set.all %}
+        {% if instance.instance_group == "core" and s.name >= "s0" and s.name <= "s99" %}
+          <a href="https://noc.wikimedia.org/db.php#tabs-{{ s.name }}"><img src="{% static 'wikimedia.png' %}" alt="noc section link" style="width:24px; height: 24px; vertical-align: middle"></a>
+        {% endif %}
+      {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p>{{ instances.count }} instances shown.</p>
+  <script>
+  new Tablesort(document.getElementById('instance-list'));
+  </script>
+
+{% endblock %}

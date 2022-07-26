@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+{% load os_version %}
+  <div class="toggle">
+  <a href="/instances">By instance</a> | <strong>by server</strong>
+  </div>
+  <table id="server-list">
+  <thead>
+  <tr>
+    <th class="fqdn">fqdn</th>
+    <th class="hostname">hostname</th>
+    <th class="dc">dc</th>
+    <th class="rack">rack</th>
+    <th class="ip">ip</th>
+    <th class="os-version">os</th>
+    <th class="uptime">uptime</th>
+    <th class="instances"># instances</th>
+    <th class="external-links">external links</th>
+    </tr></thead>
+  <tbody>
+  </tr>
+    {% for server in servers %}
+    <tr>
+      <td><a href="/servers/{{ server.hostname }}">{{ server.fqdn }}</a></td>
+      <td>{{ server.hostname }}</td>
+      <td><span class="label label-{{ server.rack.dc }}">{{ server.rack.dc }}</a></td>
+      <td><a href="https://netbox.wikimedia.org/dcim/racks/{{ server.rack.identifier }}/">{{ server.rack.name }}</a></td>
+      <td>{{ server.ip | default_if_none:""}}</td>
+      <td data-sort="{{ server.os_version | default:'' }}"><span class="label label-{{ server.os_version | os_alias | default_if_none:'' }}">{{ server.os_version | os_alias | default_if_none:"" }}</span></td>
+      <td data-sort="{{ server.last_boot | date:'c' }}">{{ server.last_boot | timesince}}</td>
+      <td><span class="label label-numinstances">{{ server.instance_set.count }}</span></td>
+      <td><a href="https://netbox.wikimedia.org/dcim/devices/?q={{ server.hostname }}"><img src="{% static 'netbox.png' %}" alt="netbox icon" style="width:24px; height: 24px; vertical-align:middle;"></a>&nbsp;
+      <a href="https://grafana.wikimedia.org/d/000000377/host-overview?var-server={{ server.hostname }}&amp;var-datasource=thanos"><img src="{% static 'grafana.png' %}" alt="grafana graph link" style="width:24px; height: 24px; vertical-align: middle"></a>&nbsp;
+      <a href="https://icinga.wikimedia.org/cgi-bin/icinga/status.cgi?search_string={{ server.hostname }}"><img src="{% static 'icinga.png' %}" alt="icinga status link" style="width:24px; height: 24px; vertical-align: middle"></a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p>{{ servers.count }} servers shown.</p>
+  <script>
+  new Tablesort(document.getElementById('server-list'));
+  </script>
+
+{% endblock %}

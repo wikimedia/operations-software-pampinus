@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load fqdn %}
+{% load time %}
+
+<div class="toggle">
+<a href="/dbbackups">Current status</a> | <a href="/dbbackups/jobs">Jobs</a>
+</div>
+
+<h2>Backup {{ backup.name }}</h2>
+  <table>
+    <tr>
+      <td>Name</td>
+      <td>{{ backup.name }}</td>
+    </tr>
+    <tr>
+      <td>Backup status</td>
+      <td><span class="label label-{{ backup.status }}">{{ backup.status }}</span></td>
+    <tr>
+      <td>Datacenter</td>
+      <td><a href="/servers/?search={{ backup.host | datacenter }}">{{ backup.host | datacenter }}</a></td>
+    </tr>
+    <tr>
+      <td>Section</td>
+      <td><a href="/instances/?search={{ backup.section }}">{{ backup.section }}</a></td>
+    </tr>
+    <tr>
+      <td>Source</td>
+      <td><a href="/instances/{{backup.source | fqdn_to_instance }}">{{ backup.source }}</a></td>
+    </tr>
+    <tr>
+      <td>Destination</td>
+      <td>{{ backup.host }}</td>
+    </tr>
+    <tr>
+      <td>Backup type</td>
+      <td>{{ backup.type }}</td>
+    </tr>
+    <tr>
+      <td>Start time</td>
+      <td title="{{ backup.start_date | date:'c' }}">{{ backup.start_date }}</td>
+    </tr>
+    <tr>
+      <td>End time</td>
+      <td title="{{ backup.end_date | date:'c' }}">{{ backup.end_date | default:"-" }}</td>
+    </tr>
+    <tr>
+      <td>Duration</td>
+      <td title="{{ backup.duration | seconds }} seconds">{{ backup.duration | timespan | default:"" }}</td>
+    </tr>
+    <tr>
+      <td>Total size</td>
+      <td title="{{ backup.total_size }} bytes">
+      {% if backup.total_size is not None %}
+      {{ backup.total_size | filesizeformat }}
+      {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td>Number of files</td>
+      <td>
+      {{ backup.file_set.count }}
+      </td>
+    </tr>
+  </table>
+
+  <h3>Files in backup {{ backup.name }}:</h3>
+
+  <table id="file-list">
+  <thead>
+  <tr>
+    <th class="file-path">path</th>
+    <th class="file-name">name</th>
+    <th class="size">size</th>
+    <th class="date">date</th>
+  </tr></thead>
+  <tbody>
+  </tr>
+    {% for file in files %}
+    <tr>
+      <td>{{ file.file_path }}</td>
+      <td>{{ file.file_name }}</td>
+      <td data-sort="{{ file.size}}">{{ file.size | filesizeformat }}</td>
+      <td data-sort="{{ file.file_date | date:'c' }}">{{ file.file_date }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p>{{ num_files_showed }} files shown out of {{ files.paginator.count }}.</p>
+  <script>
+  new Tablesort(document.getElementById('file-list'));
+  </script>
+
+  <div class="pagination">
+    <span class="step-links">
+      {% if files.has_previous %}
+        <a href="?page=1&amp;search={{ search }}">&laquo; first</a>
+        <a href="?page={{ files.previous_page_number }}&amp;search={{ search }}">previous</a>
+      {% endif %}
+
+      <span class="current">
+        Page {{ files.number }} of {{ files.paginator.num_pages }}.
+      </span>
+
+      {% if files.has_next %}
+        <a href="?page={{ files.next_page_number }}&amp;search={{ search }}">next</a>
+        <a href="?page={{ files.paginator.num_pages }}&amp;search={{ search }}">last &raquo;</a>
+      {% endif %}
+    </span>
+</div>
+
+{% endblock %}

@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+{% load static %}
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{{title}} - Pampinus</title>
+    <script type="text/javascript" src="{% static 'jquery-3.6.0.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'tablesort.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'tablesort.number.min.js' %}"></script>
+    <script type="text/javascript">window.onload = function() { document.getElementById("search").focus(); };</script>
+    <link href="{% static 'normalize.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'pampinus.css' %}" rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/svg+xml" href="{% static 'pampinus.svg' %}">
+</head>
+
+<body>
+
+<header id="page-header">
+
+    <nav>
+        <!--<a href="/instances">Servers</a>-->
+        <a href="/dbbackups">DB Backups</a>
+        <!--<a href="/reports">Reports</a>-->
+        <a href="/admin">Admin</a>
+    </nav>
+
+    <h1>
+        <a href="/"><img src="{% static 'pampinus.svg' %}" />
+        Pampinus</a>
+    </h1>
+    <span id="searchForm"><form autocomplete="off"><input type="text" id="search" name="search" autocomplete="false" value="{{ search }}"></form></span>
+    <div style="clear:both" />
+</header>
+
+<section role="main" id="page-content">
+{% block content %}{% endblock %}
+</section>
+
+<footer id="page-footer">
+
+</footer>
+
+</body>
+</html>

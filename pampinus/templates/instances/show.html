@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load prometheus_port %}
+
+{% block content %}
+<h2>MariaDB Instance {{ instance.name }}</h2>
+  <table>
+    <tr>
+      <td>Name</td>
+      <td>{{ instance.name }}</td>
+    </tr>
+    <tr>
+      <td>IP Address</td>
+      <td><a href="https://netbox.wikimedia.org/search/?q={{ instance.server.ipv4 }}&amp;obj_type=ipaddress">{{ instance.server.ip | default_if_none:"" }} <img src="{% static 'netbox.png' %}" alt="netbox icon" style="vertical-align:middle;"></a></td>
+    </tr>
+    <tr>
+      <td>Server</td>
+      <td><a href="/servers/{{ instance.server.hostname }}">{{ instance.server.fqdn }}</a></td>
+    </tr>
+    <tr>
+      <td>Port</td>
+      <td>{{ instance.port }}</td>
+    </tr>
+    <tr>
+      <td>MySQL instance group</td>
+      <td><span class="label label-{{ instance.instance_group }}">{{ instance.instance_group }}</span></td>
+    </tr>
+    <tr>
+      <td>Primary or replica?</td>
+      <td>{{ instance.master_set.all | join:", " | default:"replica" }}
+    </tr>
+    <tr>
+      <td>Sections (replication sets)</td>
+      <td><a href="https://orchestrator.wikimedia.org/web/cluster/alias/{{ instance.section_set.all | first }}">{{ instance.section_set.all | join:", " }} <img src="{% static 'orchestrator.png' %}" alt="orchestrator section link" style="vertical-align: middle"></a>
+    </tr>
+    <tr>
+      <td>Version</td>
+      <td>{{ instance.version | default_if_none:"" }}</td>
+    </tr>
+    <tr>
+      <td>MySQL Uptime</td>
+      <td>{{ instance.last_start | timesince | default_if_none:"" }} (Last start: {{instance.last_start | default:"unknown" }})</td>
+    </tr>
+    <tr>
+      <td>Monitoring</td>
+      <td><a href="https://grafana.wikimedia.org/d/000000273/mysql?var-job=All&amp;var-server={{ instance.server.hostname }}&amp;var-port={{ instance.port | prometheus_port }}"><img src="{% static 'grafana.png' %}" alt="grafana graph link"></a></td>
+    </tr>
+  </table>
+{% endblock %}
