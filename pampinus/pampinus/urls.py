@@ -30,7 +30,7 @@ urlpatterns = [
     path('dbbackups/', dbbackups_views.backup_status, name='backup_status'),
     path('dbbackups/jobs/', dbbackups_views.backup_list, name='backup_list'),
     path('dbbackups/jobs/<int:pk>/', dbbackups_views.backup_show, name='backup_show'),
-    path('dbbackups/status/<str:dc>/<str:section>/<str:backup_type>/',
+    path('dbbackups/<str:dc>/<str:section>/<str:backup_type>/',
          dbbackups_views.backup_status_section, name='backup_status_section'),
 
 ]

@@ -49,7 +49,7 @@
       {% else %}
       <td>
       {% endif %}
-      <a href="/dbbackups/status/{{section_status.dc}}/{{section_status.name}}/{{section_status.backup_type}}">{{ section_status.backup_type }}</a>
+      <a href="/dbbackups/{{section_status.dc}}/{{section_status.name}}/{{ section_status.backup_type }}/">{{ section_status.backup_type }}</a>
       </td>
       <td title="{{ section_status.state_description }}"><span class="label label-{{section_status.state}}">{{section_status.state}}</span></td>
       {% if section_status.state == 'stale' %}

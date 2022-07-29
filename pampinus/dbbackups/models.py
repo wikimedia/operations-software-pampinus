@@ -111,6 +111,31 @@ class Status:
         self.last_job = last_job
         self.duration = duration
 
+    def as_dict(self):
+        if self.last_job is None:
+            last_job = None
+        else:
+            last_job = {
+                'id': self.last_job.id,
+                'status': self.last_job.status,
+                'name': self.last_job.name,
+            }
+        return {
+            'name': self.name,
+            'dc': self.dc,
+            'backup_type': self.backup_type,
+            'state': self.state,
+            'state_description': self.state_description,
+            'start_date': self.start_date.isoformat(),
+            'end_date': self.end_date.isoformat(),
+            'duration_seconds': self.duration.seconds if self.duration is not None else None,
+            'size_total': self.size,
+            'size_change_percentage': self.size_change_percentage,
+            'job_id': self.job,
+            'last_job': last_job,
+            'message': self.msg,
+        }
+
     @staticmethod
     def check_all_sections(dc='all', section='all', backup_type='all'):
         if dc == 'all':
