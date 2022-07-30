@@ -41,6 +41,10 @@
         <td title="{{ status_section.state_description }}"><span class="label label-{{status_section.state}}">{{status_section.state}}</span></td>
     </tr>
     <tr>
+        <td title="What is the maximum age of the backup, for which it is considered 'fresh'?">Expected freshness</td>
+        <td>{{status_section.stale_time_days}} days</td>
+    </tr>
+    <tr>
         <td title="When did the backup start?">Start time</td>
         <td title="{{status_section.start_date | default:''}}">{{status_section.start_date | date:'c' | default:''}}</td>
     </tr>
@@ -69,7 +73,13 @@
         {% endif %}</td>
     </tr>
     <tr>
-        <td title="Percentage of change using as a base the latest backup of the same data, type and datacenter">Size change (percentage)</td>
+        <td title="Number of bytes that the latest successful job has changed (growth is positive, decrease is negative) using as a base the previous succesful backup of the same data, type and datacenter">Size change (bytes)</td>
+        <td title="{{ status_section.size_change_bytes }} bytes">
+        {{ status_section.size_change_bytes | bytes_change }}
+        </td>
+    </tr>
+    <tr>
+        <td title="Percentage of size the latest successful job has changed (growth is positive, decrease is negative) using as a base the latest sucessful backup of the same data, type and datacenter">Size change (percentage)</td>
         <td title="{{ status_section.size_change_percentage }} %">
         {{ status_section.size_change_percentage | percentage_change | default:"" }}
         </td>

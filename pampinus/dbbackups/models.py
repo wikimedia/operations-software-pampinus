@@ -91,21 +91,25 @@ class Status:
         ('wrong_size', 'The backup size changed noticeably compared to the previous backup'),
         ('very_wrong_size', 'The backup is too small, or it changed a lot compared to the previous backup'),
         ('only_one', 'There is only one backup, so we cannot compare it size'),
-        ('fresh', 'There is a backup that finished correctly and has the right size')
+        ('fresh', 'There is a backup that finished correctly, has the right size and is not too old')
     ]
 
     def __init__(self, dc, name, backup_type, state, msg=None, state_description=None,
                  start_date=None, end_date=None, job=None, last_job=None,
-                 duration=None, size=None, size_change_percentage=None):
+                 duration=None, size=None, size_change_percentage=None,
+                 size_change_bytes=None):
         self.dc = dc
         self.name = name
         self.backup_type = backup_type
         self.state = state
+        self.stale_time_days = (Status.sections_to_check.get(name).get(backup_type)
+                                if Status.sections_to_check.get(name) else None)
         self.state_description = state_description
         self.start_date = start_date
         self.end_date = end_date
         self.size = size
         self.size_change_percentage = size_change_percentage
+        self.size_change_bytes = size_change_bytes
         self.msg = msg
         self.job = job
         self.last_job = last_job
@@ -125,11 +129,13 @@ class Status:
             'dc': self.dc,
             'backup_type': self.backup_type,
             'state': self.state,
+            'stale_time_days': self.stale_time_days,
             'state_description': self.state_description,
             'start_date': self.start_date.isoformat(),
             'end_date': self.end_date.isoformat(),
             'duration_seconds': self.duration.seconds if self.duration is not None else None,
             'size_total': self.size,
+            'size_change_bytes': self.size_change_bytes,
             'size_change_percentage': self.size_change_percentage,
             'job_id': self.job,
             'last_job': last_job,
@@ -231,7 +237,8 @@ class Status:
                           job=result.id, last_job=last_job, size=result.total_size)
         if len(results) >= 2:
             previous = results[1]
-            percentage_change = (result.total_size - previous.total_size) / previous.total_size * 100.0
+            bytes_change = result.total_size - previous.total_size
+            percentage_change = bytes_change / previous.total_size * 100.0
             # critical size
             if abs(percentage_change) >= Status.percentage_change_alert:
                 return Status(dc=dc, name=section,
@@ -242,7 +249,8 @@ class Status:
                               start_date=result.start_date, end_date=result.end_date,
                               duration=result.duration,
                               job=result.id, last_job=last_job, size=result.total_size,
-                              size_change_percentage=percentage_change)
+                              size_change_percentage=percentage_change,
+                              size_change_bytes=bytes_change)
 
             if abs(percentage_change) >= Status.percentage_change_warning:
                 return Status(dc=dc, name=section,
@@ -253,7 +261,8 @@ class Status:
                               start_date=result.start_date, end_date=result.end_date,
                               duration=result.duration,
                               job=result.id, last_job=last_job, size=result.total_size,
-                              size_change_percentage=percentage_change)
+                              size_change_percentage=percentage_change,
+                              size_change_bytes=bytes_change)
             # fresh backups
             return Status(dc=dc, name=section,
                           backup_type=result.type, state='fresh',
@@ -262,7 +271,8 @@ class Status:
                           start_date=result.start_date, end_date=result.end_date,
                           duration=result.duration,
                           job=result.id, last_job=last_job, size=result.total_size,
-                          size_change_percentage=percentage_change)
+                          size_change_percentage=percentage_change,
+                          size_change_bytes=bytes_change)
 
         # readonly host with 1 backup
         return Status(dc=dc, name=section,
@@ -271,8 +281,7 @@ class Status:
                       state_description=state_descriptions.get('fresh'),
                       start_date=result.start_date, end_date=result.end_date,
                       duration=result.duration,
-                      job=result.id, last_job=last_job, size=result.total_size,
-                      size_change_percentage='-')
+                      job=result.id, last_job=last_job, size=result.total_size)
 
 
 class Object(models.Model):

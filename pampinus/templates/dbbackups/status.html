@@ -64,7 +64,7 @@
       {% if section_status.size %}
       {{ section_status.size | filesizeformat }}
       {% endif %}</td>
-      <td title="{{ section_status.size_change_percentage }} %" style="text-align: right;">
+      <td title="{{ section_status.size_change_bytes | bytes_change | default:""}}, {{ section_status.size_change_bytes }} bytes" style="text-align: right;">
       {{ section_status.size_change_percentage | percentage_change | default:"" }}
       </td>
       <td>
