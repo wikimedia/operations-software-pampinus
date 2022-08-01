@@ -4,6 +4,10 @@
 {% load os_version %}
 
 {% block content %}
+  <div class="toggle">
+  <a href="/instances">By instance</a><a href="/servers">by server</a>
+  </div>
+
 <h2>Server {{ server.fqdn }}</h2>
   <table>
     <tr>
@@ -16,15 +20,15 @@
     </tr>
     <tr>
       <td>Datacenter</td>
-      <td><a href="https://netbox.wikimedia.org/dcim/sites/{{ server.rack.dc }}"><span class="label label-{{ server.rack.dc }}">{{ server.rack.dc }}</span></a></td>
+      <td><a class="visited_enabled" href="https://netbox.wikimedia.org/dcim/sites/{{ server.rack.dc }}"><span class="label label-{{ server.rack.dc }}">{{ server.rack.dc }}</span></a></td>
     </tr>
     <tr>
       <td>Rack</td>
-      <td><a href="https://netbox.wikimedia.org/dcim/racks/{{ server.rack.identifier }}/">{{ server.rack.name }}</a></td>
+      <td><a class="visited_enabled" href="https://netbox.wikimedia.org/dcim/racks/{{ server.rack.identifier }}/">{{ server.rack.name }}</a></td>
     </tr>
     <tr>
       <td>IP Address</td>
-      <td><a href="https://netbox.wikimedia.org/ipam/ip-addresses/?q={{ server.ip }}">{{ server.ip | default_if_none:"" }} <img src="{% static 'netbox.png' %}" alt="netbox icon" style="vertical-align:middle;"></a></td>
+      <td><a class="visited_enabled" href="https://netbox.wikimedia.org/ipam/ip-addresses/?q={{ server.ip }}">{{ server.ip | default_if_none:"" }} <img src="{% static 'netbox.png' %}" alt="netbox icon" style="vertical-align:middle;"></a></td>
     </tr>
     <tr>
       <td>OS version</td>
@@ -59,7 +63,7 @@
     <tbody>
         {% for instance in instances %}
         <tr>
-        <td><a href="/instances/{{ instance.name }}/">{{ instance.name }}</a></td>
+        <td><a class="visited_enabled" href="/instances/{{ instance.name }}/">{{ instance.name }}</a></td>
         <td>{{ instance.port }}</td>
         <td><span class="label label-{{ instance.instance_group }}">{{ instance.instance_group }}</span></td>
         <td>{{ instance.master_set.all | join:", " | default:"replica" }}</td>

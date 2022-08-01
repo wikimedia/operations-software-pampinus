@@ -6,7 +6,7 @@
 {% load humanize %}
 
   <div class="toggle">
-  <strong>Current status</strong> | <a href="/dbbackups/jobs">Jobs</a>
+  <a class="inactive">Current status</a><a href="/dbbackups/jobs">Jobs</a>
   </div>
 
   <h2>Backup status</h2>
@@ -57,7 +57,7 @@
       {% else %}
       <td style="min-width:12em">
       {% endif %}
-      <a title="{{section_status.end_date | date:'c' | default:''}}" href="/dbbackups/jobs/{{section_status.job}}">
+      <a class="visited_enabled" title="{{section_status.end_date | date:'c' | default:''}}" href="/dbbackups/jobs/{{section_status.job}}">
       {{section_status.end_date | naturaltime | default:""}}
       </a></td>
       <td title="{{ section_status.size }} bytes">
@@ -67,7 +67,7 @@
       <td title="{{ section_status.size_change_bytes | bytes_change | default:""}}, {{ section_status.size_change_bytes }} bytes" style="text-align: right;">
       {{ section_status.size_change_percentage | percentage_change | default:"" }}
       </td>
-      <td>
+      <td style="min-width:16em">
       {{ section_status.msg | default:"" }}
       {% if section_status.last_job %}
         {% if section_status.last_job.status == 'ongoing' %}
@@ -75,6 +75,9 @@
         {% elif section_status.last_job.status == 'failed' %}
           Last job for this section: <a href="/dbbackups/jobs/{{ section_status.last_job.id }}">{{ section_status.last_job.name }}</a> failed!
         {% endif %}
+      {% endif %}
+      {% if not section_status.msg and not section_status.last_job or section_status.last_job.status == 'fresh' %}
+         &#8212;
       {% endif %}
       </td>
     </tr>

@@ -4,52 +4,52 @@
 {% load time %}
 
 <div class="toggle">
-<a href="/dbbackups">Current status</a> | <a href="/dbbackups/jobs">Jobs</a>
+<a href="/dbbackups">Current status</a><a href="/dbbackups/jobs">Jobs</a>
 </div>
 
 <h2>Backup {{ backup.name }}</h2>
   <table>
     <tr>
-      <td>Name</td>
+      <td><strong>Name</strong></td>
       <td>{{ backup.name }}</td>
     </tr>
     <tr>
-      <td>Backup status</td>
-      <td><span class="label label-{{ backup.status }}">{{ backup.status }}</span></td>
+      <td><strong>Backup status</strong></td>
+      <td title="{{ backup.status_description }}"><span class="label label-{{ backup.status }}">{{ backup.status }}</span></td>
     <tr>
-      <td>Datacenter</td>
+      <td><strong>Datacenter</strong></td>
       <td><a href="/servers/?search={{ backup.host | datacenter }}">{{ backup.host | datacenter }}</a></td>
     </tr>
     <tr>
-      <td>Section</td>
+      <td><strong>Section</strong></td>
       <td><a href="/instances/?search={{ backup.section }}">{{ backup.section }}</a></td>
     </tr>
     <tr>
-      <td>Source</td>
-      <td><a href="/instances/{{backup.source | fqdn_to_instance }}">{{ backup.source }}</a></td>
+      <td><strong>Source</strong></td>
+      <td><a class="visited_enabled" href="/instances/{{backup.source | fqdn_to_instance }}">{{ backup.source }}</a></td>
     </tr>
     <tr>
-      <td>Destination</td>
+      <td><strong>Destination</strong></td>
       <td>{{ backup.host }}</td>
     </tr>
     <tr>
-      <td>Backup type</td>
-      <td>{{ backup.type }}</td>
+      <td><strong>Backup type</strong></td>
+      <td title="{{ backup.type_description }}">{{ backup.type }}</td>
     </tr>
     <tr>
-      <td>Start time</td>
+      <td><strong>Start time</strong></td>
       <td title="{{ backup.start_date | date:'c' }}">{{ backup.start_date }}</td>
     </tr>
     <tr>
-      <td>End time</td>
+      <td><strong>End time</strong></td>
       <td title="{{ backup.end_date | date:'c' }}">{{ backup.end_date | default:"-" }}</td>
     </tr>
     <tr>
-      <td>Duration</td>
+      <td><strong>Duration</strong></td>
       <td title="{{ backup.duration | seconds }} seconds">{{ backup.duration | timespan | default:"" }}</td>
     </tr>
     <tr>
-      <td>Total size</td>
+      <td><strong>Total size</strong></td>
       <td title="{{ backup.total_size }} bytes">
       {% if backup.total_size is not None %}
       {{ backup.total_size | filesizeformat }}
@@ -57,7 +57,7 @@
       </td>
     </tr>
     <tr>
-      <td>Number of files</td>
+      <td><strong>Number of files</strong></td>
       <td>
       {{ backup.file_set.count }}
       </td>

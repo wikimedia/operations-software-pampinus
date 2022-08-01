@@ -4,6 +4,10 @@
 {% load prometheus_port %}
 
 {% block content %}
+  <div class="toggle">
+  <a href="/instances">By instance</a><a href="/servers">by server</a>
+  </div>
+
 <h2>MariaDB Instance {{ instance.name }}</h2>
   <table>
     <tr>
@@ -16,7 +20,7 @@
     </tr>
     <tr>
       <td>Server</td>
-      <td><a href="/servers/{{ instance.server.hostname }}">{{ instance.server.fqdn }}</a></td>
+      <td><a class="visited_enabled" href="/servers/{{ instance.server.hostname }}">{{ instance.server.fqdn }}</a></td>
     </tr>
     <tr>
       <td>Port</td>

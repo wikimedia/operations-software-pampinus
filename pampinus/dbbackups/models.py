@@ -9,17 +9,27 @@ from wmfbackups import WMFMetrics
 
 class Backup(models.Model):
     status_list = [
-        ('ongoing', 'backup is ongoing'),
+        ('ongoing', 'backup has started and is currently running'),
         ('finished', 'backup finished sucessfully'),
-        ('failed', 'backup terminated with errors')
+        ('failed', 'backup didn\'t complete or terminated with errors')
     ]
     type_list = [
-        ('dump', 'logical dump'),
-        ('snapshot', 'snapshot')
+        ('dump', 'logical dump taken with mydumper'),
+        ('snapshot', 'snapshot taken with xtrabackup/mariabackup')
     ]
 
     class Meta:
         db_table = 'backups'
+
+    @property
+    def status_description(self):
+        status_dict = {x[0]: x[1] for x in Backup.status_list}
+        return status_dict.get(self.status, "unknown status")
+
+    @property
+    def type_description(self):
+        type_dict = {x[0]: x[1] for x in Backup.type_list}
+        return type_dict.get(self.type, "unknown backup type")
 
     @property
     def duration(self):

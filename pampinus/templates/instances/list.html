@@ -3,27 +3,28 @@
 {% load prometheus_port %}
 {% block content %}
   <div class="toggle">
-  <strong>By instance</strong> | <a href="/servers">by server</a>
+  <a class="inactive">By instance</a><a href="/servers">by server</a>
   </div>
+  <h2>List of database instances</h2>
   <table id="instance-list">
   <thead>
   <tr>
-    <th class="name">instance</th>
-    <th class="server">server</th>
-    <th class="port">port</th>
-    <th class="instance_group">group</th>
-    <th class="master">primary?</th>
-    <th class="sections">sections</th>
-    <th class="version">version</th>
-    <th class="uptime">uptime</th>
-    <th class="external-links">external links</th>
+    <th title="Name of the database server instance, normally hostname:port" class="name">instance</th>
+    <th title="hostname of the server (baremetal or virtual machine) where the instance is hosted" class="server">server</th>
+    <th title="Number of the socket 0-65535 where the instance listens mainly to incoming connections" class="port">port</th>
+    <th title="An identifier where the instance is classified under." class="instance_group">group</th>
+    <th title="If it is a primary host, the section and datacenter it is for, otherwise: replica" class="master">primary?</th>
+    <th title="The replica set (or sets, if more than one) the host is writing or replicationg" class="sections">sections</th>
+    <th title="MariaDB version the instance is running" class="version">version</th>
+    <th title="Time since the last time the database started running" class="uptime">uptime</th>
+    <th title="Links to useful monitoring or other external tools for this instance" class="external-links">external links</th>
   </tr></thead>
   <tbody>
   </tr>
     {% for instance in instances %}
     <tr>
-      <td><a href="/instances/{{ instance.name }}/">{{ instance.name }}</a></td>
-      <td><a href="/servers/{{ instance.server.hostname}}/">{{ instance.server.hostname }}</td>
+      <td><a class="visited_enabled" href="/instances/{{ instance.name }}/">{{ instance.name }}</a></td>
+      <td><a class="visited_enabled" href="/servers/{{ instance.server.hostname}}/">{{ instance.server.hostname }}</td>
       <td>{{ instance.port }}</td>
       <td><span class="label label-{{ instance.instance_group }}">{{ instance.instance_group }}</span></td>
       <td>{{ instance.master_set.all | join:", " | default:"replica" }}</td>

@@ -5,19 +5,19 @@
 {% load size %}
 
   <div class="toggle">
-  <a href="/dbbackups">Current status</a> | <a href="/dbbackups/jobs">Jobs</a>
+  <a href="/dbbackups">Current status</a><a href="/dbbackups/jobs">Jobs</a>
   </div>
 
-  <h2>{{status_section.backup_type}} status of {{status_section.name}} in {{status_section.dc}}</h2>
+  <h2>{{ status_section.backup_type | title }} status of {{ status_section.name }} in {{ status_section.dc }}</h2>
 
     <table>
     <tbody>
     <tr>
-        <td title="section, shard or identifier of the dataset backed up">Section</td>
+        <td title="section, shard or identifier of the dataset backed up"><strong>Section</strong></td>
         <td>{{status_section.name}}</td>
     </tr>
     <tr>
-        <td title="Datacenter where the copy is geographically located">Datacenter</td>
+        <td title="Datacenter where the copy is geographically located"><strong>Datacenter</strong></td>
         {% if status_section.dc == "eqiad" %}
         <td title="Datacenter located at Equinix in Ashburn, Virginia">
         {% elif status_section.dc == "codfw" %}
@@ -28,64 +28,64 @@
         {{status_section.dc}}</td>
     </tr>
     <tr>
-        <td title="Type of backup produced">Backup type</td>
+        <td title="Type of backup produced"><strong>Backup type</strong></td>
         {% if status_section.backup_type == "snapshot" %}
           <td title="Backup generated from the consistent raw contents of the data dir">
         {% elif status_section.backup_type == "dump" %}
           <td title="Backup generated from the consistent logical export of the data contents">
         {% endif %}
-        <a href="/dbbackups/status/{{status_section.dc}}/{{status_section.name}}/{{status_section.backup_type}}">{{ status_section.backup_type }}</a></td>
+        {{ status_section.backup_type }}</td>
     </tr>
     <tr>
-        <td title="Is the backup in good condition?">Backup status</td>
+        <td title="Is the backup in good condition?"><strong>Backup status</strong></td>
         <td title="{{ status_section.state_description }}"><span class="label label-{{status_section.state}}">{{status_section.state}}</span></td>
     </tr>
     <tr>
-        <td title="What is the maximum age of the backup, for which it is considered 'fresh'?">Expected freshness</td>
+        <td title="What is the maximum age of the backup, for which it is considered 'fresh'?"><strong>Expected freshness</strong></td>
         <td>{{status_section.stale_time_days}} days</td>
     </tr>
     <tr>
-        <td title="When did the backup start?">Start time</td>
-        <td title="{{status_section.start_date | default:''}}">{{status_section.start_date | date:'c' | default:''}}</td>
+        <td title="When did the backup start?"><strong>Start time</strong></td>
+        <td title="{{ status_section.start_date | default:'' }}">{{status_section.start_date | date:'c' | default:''}}</td>
     </tr>
     <tr>
-        <td title="When did the backup finish?">Finish time</td>
-        <td title="{{status_section.start_date | default:''}}">{{status_section.end_date | date:'c' | default:''}}</td>
+        <td title="When did the backup finish?"><strong>Finish time</strong></td>
+        <td title="{{ status_section.start_date | default:'' }}">{{status_section.end_date | date:'c' | default:''}}</td>
     </tr>
     <tr>
-        <td title="How much time took the backup to complete">Backup duration</td>
+        <td title="How much time took the backup to complete"><strong>Backup duration</strong></td>
         <td title="{{ status_section.duration | seconds }} seconds">
         {% if status_section.duration %}
         {{ status_section.duration | timespan }}
         {% endif %}</td>
     </tr>
     <tr>
-        <td title="Job id and link where to get more backup job information">Job details (latest complete)</td>
-        <td><a href="/dbbackups/jobs/{{status_section.job}}">
+        <td title="Job id and link where to get more backup job information"><strong>Job details (latest complete)</strong></td>
+        <td><a class="visited_enabled" href="/dbbackups/jobs/{{status_section.job}}">
         Job #{{status_section.job | default:""}}
         </a></td>
     </tr>
     <tr>
-        <td title="Size in bytes of the backup, untarred" class="size">Backup size</td>
+        <td title="Size in bytes of the backup, untarred" class="size"><strong>Backup size</strong></td>
         <td title="{{ status_section.size }} bytes">
         {% if status_section.size %}
         {{ status_section.size | filesizeformat }}
         {% endif %}</td>
     </tr>
     <tr>
-        <td title="Number of bytes that the latest successful job has changed (growth is positive, decrease is negative) using as a base the previous succesful backup of the same data, type and datacenter">Size change (bytes)</td>
+        <td title="Number of bytes that the latest successful job has changed (growth is positive, decrease is negative) using as a base the previous succesful backup of the same data, type and datacenter"><strong>Size change (bytes)</strong></td>
         <td title="{{ status_section.size_change_bytes }} bytes">
         {{ status_section.size_change_bytes | bytes_change }}
         </td>
     </tr>
     <tr>
-        <td title="Percentage of size the latest successful job has changed (growth is positive, decrease is negative) using as a base the latest sucessful backup of the same data, type and datacenter">Size change (percentage)</td>
+        <td title="Percentage of size the latest successful job has changed (growth is positive, decrease is negative) using as a base the latest sucessful backup of the same data, type and datacenter"><strong>Size change (percentage)</strong></td>
         <td title="{{ status_section.size_change_percentage }} %">
         {{ status_section.size_change_percentage | percentage_change | default:"" }}
         </td>
     </tr>
     <tr>
-        <td title="Relevant information about the backup status, if any">Message</td>
+        <td title="Relevant information about the backup status, if any"><strong>Message</strong></td>
         <td>
         {{ status_section.msg | default:"" }}
         {% if status_section.last_job %}
@@ -94,6 +94,9 @@
           {% elif status_section.last_job.status == 'failed' %}
             Last job for this section: <a href="/dbbackups/jobs/{{ status_section.last_job.id }}">{{ status_section.last_job.name }}</a> failed!
           {% endif %}
+        {% endif %}
+        {% if not status_section.msg and not status_section.last_job or status_section.last_job.status == 'fresh' %}
+         &#8212;
         {% endif %}
         </td>
     </tr>

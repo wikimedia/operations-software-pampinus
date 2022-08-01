@@ -3,28 +3,29 @@
 {% load fqdn %}
 {% load time %}
   <div class="toggle">
-  <a href="/dbbackups/">Current status</a> | <strong>Jobs</strong>
+  <a href="/dbbackups/">Current status</a><a class="inactive">Jobs</a>
   </div>
+  <h2>List of jobs</h2>
   <table id="backup-list">
   <thead>
   <tr>
-    <th class="name">name</th>
-    <th class="status">status</th>
-    <th class="type">type</th>
-    <th class="dc">dc</th>
-    <th class="section">section</th>
-    <th class="start_date">start date</th>
-    <th class="end_date">end date</th>
-    <th class="duration">duration</th>
-    <th class="total_size">total size</th>
+    <th title="Name of the backup job run, normally type.section.timestamp" class="name">name</th>
+    <th title="If the backup is ongoing (started but not yet finished), finished (completed without errors) or failed (partially completed or completed with errors)" class="status">status</th>
+    <th title="If the backup run is a dump (logical backup) or a snapshot (raw backup), the first normally taken with mydumper and the second with xtrabackup/mariabackup" class="type">type</th>
+    <th title="Datacenter -geographical location- where the backup was sent/was stored, normally eqiad (Virginia) or codfw (Texas)" class="dc">dc</th>
+    <th title="Replica set or dataset name the backup corresponds to" class="section">section</th>
+    <th title="When the backup started running (doesn't have into account remote transmission in the case of xtrabackup)" class="start_date">start date</th>
+    <th title="When the backup finished running (including postprocessing, metadata gathering and compression" class="end_date">end date</th>
+    <th title="End timstamp - Start timestamp" class="duration">duration</th>
+    <th title="Total size of the backup, gzipped for dumps (as it is the native format) but uncompressed for xtrabackup" class="total_size">total size</th>
   </tr></thead>
   <tbody>
   </tr>
     {% for backup in backups %}
     <tr>
-      <td><a href="/dbbackups/jobs/{{ backup.pk }}/">{{ backup.name }}</a></td>
-      <td><span class="label label-{{ backup.status }}">{{ backup.status }}</span></td>
-      <td>{{ backup.type }}</td>
+      <td title="Sent to {{ backup.host }} with this name"><a class="visited_enabled" href="/dbbackups/jobs/{{ backup.pk }}/">{{ backup.name }}</a></td>
+      <td title="{{ backup.status_description }}"><span class="label label-{{ backup.status }}">{{ backup.status }}</span></td>
+      <td title="{{ backup.type_description }}">{{ backup.type }}</td>
       <td>{{ backup.host | datacenter }}</td>
       <td><a href="/instances/?search={{ backup.section }}">{{ backup.section }}</a></td>
       <td data-sort="{{ backup.start_date | date:'c' }}" title="{{backup.start_date | date:'c' }}">{{ backup.start_date }}</td>
