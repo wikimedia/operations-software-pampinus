@@ -26,6 +26,8 @@ def instance_list(request):
                 instances = instances.filter(section__name=search) | instances.filter(section__name='test-' + search)
             elif search in [g[0] for g in Instance.INSTANCE_GROUPS]:
                 instances = instances.filter(instance_group=search)
+            elif len(search) == 2 and search[0] in 'ABCDEF' and search[1] in '123456789':
+                instances = instances.filter(server__rack__name=search)
             else:
                 instances = instances.filter(name__icontains=search)
     instances = instances.select_related('server')
