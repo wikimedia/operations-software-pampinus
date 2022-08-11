@@ -90,6 +90,8 @@ class Status:
         'm2': {'dump': 8},
         'm3': {'dump': 8},
         'm5': {'dump': 8},
+        'matomo': {'dump': 8, 'skip_codfw': True},
+        'analytics_meta': {'dump': 8, 'skip_codfw': True},
         'db_inventory': {'dump': 8}
     }
     datacenters_to_check = ['eqiad', 'codfw']
@@ -172,6 +174,8 @@ class Status:
             for dc in dcs:
                 properties = Status.sections_to_check.get(s)
                 if properties is not None:
+                    if properties.get('skip_codfw') and dc == 'codfw':
+                        continue
                     for backup_type in properties.keys():
                         if backup_type in backup_types:
                             status.append(Status.check(dc, s, backup_type))
