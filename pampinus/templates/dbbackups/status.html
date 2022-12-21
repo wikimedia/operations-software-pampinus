@@ -26,7 +26,7 @@
     <tbody>
     {% for section_status in status %}
     <tr>
-      <td title="{{section_status.name}}" style="max-width: 5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      <td title="{{section_status.name}}" style="max-width: 6em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
         {% ifchanged section_status.name %}
         {{section_status.name}}
         {% endifchanged %}

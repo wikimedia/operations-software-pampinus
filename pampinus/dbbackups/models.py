@@ -70,7 +70,7 @@ class Backup(models.Model):
 class Status:
     percentage_change_warning = 5.0
     percentage_change_alert = 15.0
-    min_size = 300 * 1024
+    min_size = 50000
     sections_to_check = {
         's1': {'snapshot': 2, 'dump': 8},
         's2': {'snapshot': 2, 'dump': 8},
@@ -92,7 +92,9 @@ class Status:
         'm5': {'dump': 8},
         'matomo': {'dump': 8, 'skip_codfw': True},
         'analytics_meta': {'dump': 8, 'skip_codfw': True},
-        'db_inventory': {'dump': 8}
+        'db_inventory': {'dump': 8},
+        'backup1-eqiad': {'dump': 8, 'skip_codfw': True},
+        'backup1-codfw': {'dump': 8, 'skip_eqiad': True}
     }
     datacenters_to_check = ['eqiad', 'codfw']
 
@@ -176,6 +178,8 @@ class Status:
                 if properties is not None:
                     if properties.get('skip_codfw') and dc == 'codfw':
                         continue
+                    if properties.get('skip_eqiad') and dc == 'eqiad':
+                        continue
                     for backup_type in properties.keys():
                         if backup_type in backup_types:
                             status.append(Status.check(dc, s, backup_type))
@@ -235,7 +239,7 @@ class Status:
         if result.total_size < Status.min_size:
             return Status(dc=dc, name=section,
                           backup_type=result.type, duration=result.duration, state='wrong_size',
-                          msg=f'Backup is {filesizeformat(result.size)} bytes, '
+                          msg=f'Backup is {filesizeformat(result.total_size)} bytes, '
                               f'less than the expected minimum size: {Status.min_size}.',
                           state_description=state_descriptions.get('wrong_size'),
                           start_date=result.start_date, end_date=result.end_date,
