@@ -275,6 +275,7 @@ tr:nth-child(odd) {background: #f8f9fa}
 .label-missing {background-color: #d33; }
 .label-very_wrong_size {background-color: #d33; }
 .label-stale {background-color: #fc3; }
+.label-very_stale {background-color: #d33; }
 .label-wrong_size {background-color: #fc3; }
 .label-only_one {background-color: #fc3; }
 .label-finished {background-color: #00af89; }
